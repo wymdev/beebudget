@@ -1,9 +1,10 @@
 // AuthScreen.js
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, Alert, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { loginUser } from '../../actions/actions';
+import { loginUser  , registerUser } from '../../actions/actions';
 import TextInput from 'react-native-text-input-interactive';
+import SweetAlert from '../../components/SweetAlert'
 
 export default function AuthScreen({ navigation }) {
   const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
@@ -12,27 +13,123 @@ export default function AuthScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const dispatch = useDispatch();
 
-  const handleLogin = () => {
+  const sweetAlertRef = useRef();
+
+  const handleLogin = async() => {
     if (username && password) {
-      dispatch(loginUser(username)); // Dispatch the login action
-    //   navigation.replace('Main',{ screen: 'Home' }); // Navigate to the Home screen
+      // Dispatch the login action
+      const user = await dispatch(loginUser(username, password)); // Assuming loginUser takes both username and password
+      console.log('LoginInformation>>>>',user);
+
+      // Check if the user was successfully logged in
+      if (user && user.success) {
+        // Navigate to the Home screen if login is successful
+        sweetAlertRef.current.showSweetAlert({
+          title: 'Login Success',
+          text: '',
+          showCancelButton: false,
+          cancelButtonText: '',
+          confirmButtonText: 'OK',
+          onConfirm: () => {
+            console.log('OK');
+            navigation.replace('Main', { screen: 'Home' });
+          },
+          onClose: () => {
+            console.log('Closing alert');
+          },
+          type: 'success', // Can be 'info', 'success', 'danger', 'warning'
+        });
+        // navigation.replace('Main', { screen: 'Home' });
+      } else {
+        // If login fails, show an alert with an error message
+        // Alert.alert('Login Failed', 'Incorrect username or password. Please try again.');
+        sweetAlertRef.current.showSweetAlert({
+          title: 'Login Failed',
+          text: 'Your username or password is incorrect.',
+          showCancelButton: false,
+          cancelButtonText: '',
+          confirmButtonText: 'Try Again',
+          onConfirm: () => {
+            console.log('Try again');
+          },
+          onClose: () => {
+            console.log('Closing alert');
+          },
+          type: 'danger', // Can be 'info', 'success', 'danger', 'warning'
+        });
+      }
     } else {
-      Alert.alert('Error', 'Please enter valid credentials');
+      // If either username or password is missing, show an alert
+      sweetAlertRef.current.showSweetAlert({
+        title: 'Login Failed',
+        text: 'Please fill both username and password',
+        showCancelButton: false,
+        cancelButtonText: '',
+        confirmButtonText: 'Try Again',
+        onConfirm: () => {
+          console.log('Try again');
+        },
+        onClose: () => {
+          console.log('Closing alert');
+        },
+        type: 'warning', // Can be 'info', 'success', 'danger', 'warning'
+      });
     }
   };
 
-  const handleSignup = () => {
+  // const handleSignup = () => {
+  //   if (username && password && password === confirmPassword) {
+  //     // Handle the signup logic here (e.g., API call)
+  //     Alert.alert('Success', 'Account created successfully!');
+  //     setIsLogin(true); // Switch back to login mode after successful signup
+  //   } else {
+  //     Alert.alert('Error', 'Please fill in all fields and ensure passwords match.');
+  //   }
+  // };
+  const handleSignup = async () => {
     if (username && password && password === confirmPassword) {
-      // Handle the signup logic here (e.g., API call)
-      Alert.alert('Success', 'Account created successfully!');
-      setIsLogin(true); // Switch back to login mode after successful signup
+      // Call the registerUser action
+      const result = await dispatch(registerUser(username, password));
+      
+      if (result.success) {
+        // Show success alert
+        sweetAlertRef.current.showSweetAlert({
+          title: 'Success',
+          text: 'Account created successfully!',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+          onConfirm: () => setIsLogin(true), // Switch to login mode
+          onClose: () => console.log('Closing signup success alert'),
+          type: 'success',
+        });
+        setIsLogin(true);
+      } else {
+        sweetAlertRef.current.showSweetAlert({
+          title: 'Error',
+          text: 'Could not create account. Please try again.',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+          onConfirm: () => console.log('Retry signup'),
+          onClose: () => console.log('Closing signup error alert'),
+          type: 'danger',
+        });
+      }
     } else {
-      Alert.alert('Error', 'Please fill in all fields and ensure passwords match.');
+      sweetAlertRef.current.showSweetAlert({
+        title: 'Error',
+        text: 'Please fill in all fields and ensure passwords match.',
+        showCancelButton: false,
+        confirmButtonText: 'OK',
+        onConfirm: () => console.log('Retry signup'),
+        onClose: () => console.log('Closing fields error alert'),
+        type: 'warning',
+      });
     }
   };
 
   return (
     <View style={styles.container}>
+      <SweetAlert ref={sweetAlertRef} />
       {/* Logo Image */}
       <Image
         source={require('../../../assets/images/icon.png')} // Adjust the path according to your project structure
