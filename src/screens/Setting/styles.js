@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: width * 0.06,
     },
     sectionTitle: {
-        paddingVertical: height * 0.015,
+        paddingVertical: height * 0.028,
         fontSize: width * 0.03,
         fontWeight: '600',
         color: '#9e9e9e',
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     rowLabel: {
-        fontSize: width * 0.045,
+        fontSize: width * 0.038,
         fontWeight: '400',
         color: '#0c0c0c',
     },
