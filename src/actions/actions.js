@@ -1,5 +1,5 @@
 // actions.js
-import { getCategories as fetchCategories, addCategory as addToDb, deleteCategory as removeFromDb } from '../database/db';
+import { getCategories as fetchCategories, insertCategory , deleteCategory as removeFromDb } from '../database/db';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUser , insertUser } from '../database/db';
 
@@ -92,9 +92,20 @@ export const loadCategories = () => async (dispatch) => {
 };
 
 export const addCategory = (name, icon, color) => async (dispatch) => {
-    await addToDb(name, icon, color);
-    dispatch(loadCategories());
+    try {
+        const result = await insertCategory(name, icon, color); // Insert into DB
+        if (result) {
+            dispatch({
+                type: 'ADD_CATEGORY',
+                payload: { id: result.insertId, name, icon, color }, // Update state
+            });
+            dispatch(loadCategories()); // Optionally reload categories
+        }
+    } catch (error) {
+        console.error('Error adding category:', error);
+    }
 };
+
 
 export const deleteCategory = (id) => async (dispatch) => {
     await removeFromDb(id);
