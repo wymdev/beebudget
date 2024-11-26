@@ -85,9 +85,9 @@ export const getCategories = async () => {
 };
 
 // Function to delete a category by name from the 'categories' table
-export const deleteCategory = async (name) => {
+export const deleteCategory = async (id) => {
   try {
-    const result = await db.runAsync('DELETE FROM categories WHERE name = ?', [name]);
+    const result = await db.runAsync('DELETE FROM categories WHERE id = ?', [id]);
     return result;
   } catch (error) {
     console.error('Error deleting category:', error);

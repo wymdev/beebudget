@@ -31,6 +31,12 @@ const categoryReducer = (state = initialCategoryState, action) => {
     switch (action.type) {
         case 'LOAD_CATEGORIES':
             return { ...state, categories: action.payload };
+        case 'ADD_CATEGORY':
+            return {
+                ...state,
+                categories: [...state.categories, action.payload],
+            };
+
         default:
             return state;
     }

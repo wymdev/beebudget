@@ -1,10 +1,10 @@
 // actions.js
-import { getCategories as fetchCategories, addCategory as addToDb, deleteCategory as removeFromDb } from '../database/db';
+import { getCategories as fetchCategories, insertCategory , deleteCategory as removeCategory} from '../database/db';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getUser , insertUser } from '../database/db';
+import { getUser, insertUser } from '../database/db';
 
 // Login Action
-export const loginUser = (username,password) => async (dispatch) => {
+export const loginUser = (username, password) => async (dispatch) => {
     try {
         // Call getUser from db.js to validate login credentials
         const user = await getUser(username);
@@ -16,7 +16,7 @@ export const loginUser = (username,password) => async (dispatch) => {
             // Dispatch login success action
             dispatch({ type: 'LOGIN_SUCCESS', payload: username });
             return { success: true };
-        } 
+        }
         else {
             // Dispatch login failure action or handle invalid credentials
             // Alert.alert('Error', 'Your information is incorrect or does not exist. Please sign up.');
@@ -34,18 +34,18 @@ export const registerUser = (username, password) => async (dispatch) => {
     try {
         // console.log('user,password>>>',username,password);
         // Check if the user already exists
-        console.log("insert user>>>",username,password);
-        
+        console.log("insert user>>>", username, password);
+
         const existingUser = await getUser(username);
 
-        console.log('existinguser>>>',existingUser);
-        
-        
+        console.log('existinguser>>>', existingUser);
+
+
         if (existingUser) {
             dispatch({ type: 'REGISTER_FAILURE', payload: 'User already exists' });
             return { success: false, message: 'User already exists' };
         }
-        const newUser = await insertUser( username, password );
+        const newUser = await insertUser(username, password);
 
         if (newUser) {
 
@@ -86,17 +86,35 @@ export const setFirstTimeUser = (isFirstTime) => (dispatch) => {
 };
 
 // Category Actions
+// export const loadCategories = () => async (dispatch) => {
+//     const categories = await fetchCategories();
+//     dispatch({ type: 'LOAD_CATEGORIES', payload: categories });
+// };
 export const loadCategories = () => async (dispatch) => {
-    const categories = await fetchCategories();
-    dispatch({ type: 'LOAD_CATEGORIES', payload: categories });
+    try {
+        const categories = await fetchCategories();
+        dispatch({ type: 'LOAD_CATEGORIES', payload: categories });
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
 };
 
 export const addCategory = (name, icon, color) => async (dispatch) => {
-    await addToDb(name, icon, color);
-    dispatch(loadCategories());
+    try {
+        const result = await insertCategory(name, icon, color); // Insert into DB
+        if (result) {
+            dispatch({
+                type: 'ADD_CATEGORY',
+                payload: { id: result.insertId, name, icon, color }, // Update state
+            });
+            dispatch(loadCategories()); // Optionally reload categories
+        }
+    } catch (error) {
+        console.error('Error adding category:', error);
+    }
 };
 
 export const deleteCategory = (id) => async (dispatch) => {
-    await removeFromDb(id);
+    await removeCategory(id);
     dispatch(loadCategories());
 };

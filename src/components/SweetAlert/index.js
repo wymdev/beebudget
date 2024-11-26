@@ -1,12 +1,13 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import React, { useState, forwardRef, useImperativeHandle } from "react";
 import { Modal, Text, TouchableOpacity, View, StyleSheet, Alert } from "react-native";
+import { BlurView } from "expo-blur";
 import * as Animatable from "react-native-animatable";
 
 const style = StyleSheet.create({
   customSweetAlertOuter: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dimmed modal background
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
@@ -15,20 +16,16 @@ const style = StyleSheet.create({
     width: "90%",
     paddingHorizontal: 15,
     paddingVertical: 20,
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
-    elevation: 3,
+    borderRadius: 10,
+    overflow: "hidden", // Ensures the blur effect stays within the box.
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)", // Add a slight white tint for better contrast
   },
   customSweetAlertIcon: {
-    height: 80,
-    width: 80,
+    height: 70,
+    width: 70,
     borderColor: "#009ddf",
     borderWidth: 2,
     borderRadius: 160,
@@ -38,29 +35,32 @@ const style = StyleSheet.create({
   },
   customAlertIconFa: { color: "#009ddf" },
   customSweetAlertTitle: {
-    fontSize: 25,
+    fontSize: 20,
     color: "rgba(0,0,0,0.7)",
-    marginBottom: 2,
+    marginBottom: 5,
     textAlign: "center",
   },
-  customSweetAlertText: { fontSize: 17, textAlign: "center" },
+  customSweetAlertText: {
+    fontSize: 15,
+    color: "#555",
+    textAlign: "center",
+    marginBottom: 15,
+  },
   customSweetAlertButtons: {
-    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 20,
-    justifyContent: "center",
+    justifyContent: "center", // Center buttons horizontally
+    marginTop: 10,
     gap: 10,
   },
   customSweetAlertButton: {
     height: 35,
     paddingHorizontal: 25,
-    backgroundColor: "rgba(0,0,0,0.3)",
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 5,
   },
-  customSweetAlertButtonText: { color: "#fff", fontSize: 18 },
+  customSweetAlertButtonText: { fontSize: 16 },
 });
 
 const SweetAlert = forwardRef((props, ref) => {
@@ -134,28 +134,36 @@ const SweetAlert = forwardRef((props, ref) => {
   return (
     <Modal animationType="fade" visible={showModal} transparent={true}>
       <View style={style.customSweetAlertOuter}>
-        <Animatable.View animation="bounceIn" style={style.customSweetAlertBox}>
-          <Animatable.View
-            animation="jello"
-            duration={500}
-            style={[style.customSweetAlertIcon, { borderColor: iconColor }]}
-          >
-            <Animatable.View duration={1600} animation="rubberBand">
-              <FontAwesome5 size={38} style={[style.customAlertIconFa, { color: iconColor }]} name={iconName} />
+        <Animatable.View animation="bounceIn">
+          <BlurView intensity={90} style={style.customSweetAlertBox}>
+            <Animatable.View
+              animation="jello"
+              duration={500}
+              style={[style.customSweetAlertIcon, { borderColor: iconColor }]}
+            >
+              <Animatable.View duration={1600} animation="rubberBand">
+                <FontAwesome5 size={38} style={[style.customAlertIconFa, { color: iconColor }]} name={iconName} />
+              </Animatable.View>
             </Animatable.View>
-          </Animatable.View>
-          <Text style={style.customSweetAlertTitle}>{title}</Text>
-          <Text style={style.customSweetAlertText}>{text}</Text>
-          <View style={style.customSweetAlertButtons}>
-            {showCancelButton && (
-              <TouchableOpacity onPress={closeModal} style={[style.customSweetAlertButton, { backgroundColor: "#e74c3c" }]}>
-                <Text style={[style.customSweetAlertButtonText, { color: "#fff" }]}>{cancelButtonText}</Text>
+            <Text style={style.customSweetAlertTitle}>{title}</Text>
+            <Text style={style.customSweetAlertText}>{text}</Text>
+            <View style={style.customSweetAlertButtons}>
+              {showCancelButton && (
+                <TouchableOpacity
+                  onPress={closeModal}
+                  style={[style.customSweetAlertButton, { backgroundColor: "#e74c3c" }]}
+                >
+                  <Text style={[style.customSweetAlertButtonText, { color: "#fff" }]}>{cancelButtonText}</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={handleConfirm}
+                style={[style.customSweetAlertButton, { backgroundColor: "#52E78C" }]}
+              >
+                <Text style={[style.customSweetAlertButtonText, { color: "#000" }]}>{confirmButtonText}</Text>
               </TouchableOpacity>
-            )}
-            <TouchableOpacity onPress={handleConfirm} style={[style.customSweetAlertButton, { backgroundColor: "#81ea74" }]}>
-              <Text style={[style.customSweetAlertButtonText, { color: "#000" }]}>{confirmButtonText}</Text>
-            </TouchableOpacity>
-          </View>
+            </View>
+          </BlurView>
         </Animatable.View>
       </View>
     </Modal>
